@@ -19,6 +19,9 @@ import torch.optim as optim
 import torch.utils.data
 from torchvision import datasets
 from torchvision import transforms
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 
 DEVICE = torch.device("cpu")
@@ -117,6 +120,32 @@ def objective(trial):
             raise optuna.exceptions.TrialPruned()
 
     return accuracy
+
+
+def draw_heatmap(categories, x_values, accuracy_values):
+    """
+    categories - дискретное множество, координаты по Y (индексы: 0, 1, ..., N)
+
+    """
+    fig, ax = plt.subplots(figsize=(10, 6))
+    im = ax.pcolormesh(
+        x_values,                         # координаты по X (непрерывные)
+        np.arange(len(categories)),    
+        accuracy_values,
+        cmap='viridis',                 # цветовая карта
+        shading='auto'                  # плавное затенение
+    )
+    ax.set_yticks(np.arange(len(categories)) + 0.5)  # центры ячеек
+    ax.set_yticklabels(categories)                     # подписи категорий
+    ax.set_xlabel('Непрерывная переменная X')
+    ax.set_ylabel('Дискретные категории Y')
+    ax.set_title('Тепловая карта: дискретная Y, непрерывная X')
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Значение (интенсивность)')
+    ax.grid(True, which='major', axis='y', color='w', linewidth=1.5, alpha=0.5)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
